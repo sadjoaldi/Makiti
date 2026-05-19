@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: makiti_postgres
+    environment:
+      POSTGRES_USER: makiti
+      POSTGRES_PASSWORD: makiti_password
+      POSTGRES_DB: makiti_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - makiti_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: makiti_backend
+    environment:
+      DATABASE_URL: postgresql://makiti:makiti_password@postgres:5432/makiti_db
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - makiti_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: makiti_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - makiti_network
+
+volumes:
+  postgres_data:
+
+networks:
+  makiti_network:
+    driver: bridge

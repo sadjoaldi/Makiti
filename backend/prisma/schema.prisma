@@ -1,0 +1,122 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql" 
+}
+
+// ─── Enums ────────────────────────────────────────────────
+
+enum ListingCondition {
+  NEW
+  USED
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  PENDING
+  ARCHIVED
+}
+
+// ─── Models ───────────────────────────────────────────────
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  phone      String   @unique
+  password   String
+  firstName  String
+  lastName   String?
+  avatar     String?
+  city       String?
+  district   String?
+  isVerified Boolean  @default(false)
+  isAdmin    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  listings         Listing[]
+  favorites        Favorite[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  icon      String?
+  createdAt DateTime @default(now())
+
+  listings Listing[]
+}
+
+model Listing {
+  id          String           @id @default(uuid())
+  title       String
+  slug        String           @unique
+  description String
+  price       Float
+  city        String
+  district    String?
+  address     String?
+  latitude    Float?
+  longitude   Float?
+  condition   ListingCondition
+  status      ListingStatus    @default(ACTIVE)
+  views       Int              @default(0)
+  isFeatured  Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  userId     String
+  categoryId String
+
+  user     User     @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  images    ListingImage[]
+  favorites Favorite[]
+  messages  Message[]
+}
+
+model ListingImage {
+  id        String   @id @default(uuid())
+  url       String
+  publicId  String
+  createdAt DateTime @default(now())
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  listingId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  senderId   String
+  receiverId String
+  listingId  String
+
+  sender   User    @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  listing  Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}

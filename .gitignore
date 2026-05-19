@@ -19,3 +19,6 @@ npm-debug.log*
 
 # Prisma
 backend/prisma/migrations/*.sql
+package-lock.json
+yarn.lock
+.vscode
