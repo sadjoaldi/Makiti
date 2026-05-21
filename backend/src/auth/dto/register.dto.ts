@@ -21,4 +21,7 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   city?: string;
+
+  @IsString()
+  otpCode!: string;
 }

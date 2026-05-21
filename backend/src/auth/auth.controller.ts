@@ -1,3 +1,4 @@
+import { User } from '.prisma/client';
 import {
   Body,
   Controller,
@@ -7,17 +8,31 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-
-import { User } from '.prisma/client';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { OtpService } from './otp.service';
 
 type RequestWithUser = Request & { user: Omit<User, 'password'> };
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly otpService: OtpService,
+  ) {}
+
+  @Post('otp/send')
+  sendOtp(@Body() dto: SendOtpDto) {
+    return this.otpService.sendOtp(dto.phone);
+  }
+
+  @Post('otp/verify')
+  verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.otpService.verifyOtp(dto.phone, dto.code);
+  }
 
   @Post('register')
   register(@Body() dto: RegisterDto) {

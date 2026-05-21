@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ConflictException,
   Injectable,
@@ -9,12 +8,14 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { OtpService } from './otp.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly otpService: OtpService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -28,16 +29,22 @@ export class AuthService {
       throw new ConflictException('Email ou téléphone déjà utilisé');
     }
 
+    // Vérifier l'OTP
+    await this.otpService.verifyOtp(dto.phone, dto.otpCode);
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const { otpCode: _, ...userData } = dto;
 
     const user = await this.prisma.user.create({
       data: {
-        ...dto,
+        ...userData,
         password: hashedPassword,
+        isVerified: true,
       },
     });
 
-    const { password: _, ...result } = user;
+    const { password: _password, ...result } = user;
     return {
       user: result,
       accessToken: this.generateToken(user.id, user.email),
@@ -55,7 +62,7 @@ export class AuthService {
     if (!isPasswordValid)
       throw new UnauthorizedException('Identifiants invalides');
 
-    const { password: _, ...result } = user;
+    const { password: _password, ...result } = user;
     return {
       user: result,
       accessToken: this.generateToken(user.id, user.email),
