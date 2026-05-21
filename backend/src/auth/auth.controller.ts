@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -24,6 +25,7 @@ export class AuthController {
     private readonly otpService: OtpService,
   ) {}
 
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post('otp/send')
   sendOtp(@Body() dto: SendOtpDto) {
     return this.otpService.sendOtp(dto.phone);
@@ -39,6 +41,7 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
