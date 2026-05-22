@@ -4,10 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "docker compose up --build",
+    "dev:db": "docker compose up postgres -d",
+    "staging": "docker compose -f docker-compose.staging.yml --env-file .env.staging up --build",
+    "staging:down": "docker compose -f docker-compose.staging.yml down",
     "dev:backend": "pnpm --filter backend start:dev",
     "dev:frontend": "pnpm --filter frontend dev",
     "build:backend": "pnpm --filter backend build",
     "build:frontend": "pnpm --filter frontend build",
+    "seed": "pnpm --filter backend seed",
     "lint": "pnpm -r lint"
   },
   "keywords": [],

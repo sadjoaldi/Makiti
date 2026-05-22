@@ -3,7 +3,7 @@ version: "3.9"
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: makiti_postgres
+    container_name: makiti_postgres_dev
     environment:
       POSTGRES_USER: makiti
       POSTGRES_PASSWORD: makiti_password
@@ -11,22 +11,27 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
     networks:
       - makiti_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U makiti -d makiti_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: makiti_backend
-    environment:
-      DATABASE_URL: postgresql://makiti:makiti_password@postgres:5432/makiti_db
-      NODE_ENV: development
+      dockerfile: Dockerfile.dev
+    container_name: makiti_backend_dev
+    env_file:
+      - ./backend/.env
     ports:
       - "3001:3001"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -36,12 +41,14 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: makiti_frontend
+      dockerfile: Dockerfile.dev
+    container_name: makiti_frontend_dev
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
     ports:
       - "3000:3000"
+    depends_on:
+      - backend
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -49,7 +56,7 @@ services:
       - makiti_network
 
 volumes:
-  postgres_data:
+  postgres_dev_data:
 
 networks:
   makiti_network:

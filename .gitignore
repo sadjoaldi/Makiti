@@ -2,6 +2,8 @@
 .env
 .env.local
 .env.*.local
+.env.staging
+.env.production
 
 # Node
 node_modules/
@@ -22,3 +24,7 @@ backend/prisma/migrations/*.sql
 package-lock.json
 yarn.lock
 .vscode
+
+# Docker
+docker-compose.override.yml
+
