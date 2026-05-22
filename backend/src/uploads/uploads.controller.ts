@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -32,6 +33,7 @@ const imageFilter = (
   cb(null, true);
 };
 
+@ApiTags('Updloads')
 @Controller('uploads')
 @UseGuards(JwtAuthGuard)
 export class UploadsController {

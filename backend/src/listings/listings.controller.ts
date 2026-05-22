@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -17,6 +18,7 @@ import { QueryListingDto } from './dto/query-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { ListingsService } from './listings.service';
 
+@ApiTags('Listings')
 @Controller('listings')
 export class ListingsController {
   constructor(private readonly listingsService: ListingsService) {}

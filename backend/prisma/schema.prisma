@@ -43,6 +43,9 @@ model User {
   favorites        Favorite[]
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@index([email])
+  @@index([phone])
 }
 
 model Category {
@@ -82,6 +85,13 @@ model Listing {
   images    ListingImage[]
   favorites Favorite[]
   messages  Message[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([city])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId])
 }
 
 model ListingImage {

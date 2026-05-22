@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -25,28 +26,34 @@ export class AuthController {
     private readonly otpService: OtpService,
   ) {}
 
+  @ApiOperation({ summary: 'Envoyer un OTP pas SMS' })
   @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post('otp/send')
   sendOtp(@Body() dto: SendOtpDto) {
     return this.otpService.sendOtp(dto.phone);
   }
 
+  @ApiOperation({ summary: 'Vérifier un OTP' })
   @Post('otp/verify')
   verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.otpService.verifyOtp(dto.phone, dto.code);
   }
 
+  @ApiOperation({ summary: 'Créer un compte' })
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
+  @ApiOperation({ summary: 'Se connecter' })
   @Throttle({ default: { ttl: 60000, limit: 10 } })
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
+  @ApiOperation({ summary: 'Récuperer un profil' })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   me(@Request() req: RequestWithUser) {
