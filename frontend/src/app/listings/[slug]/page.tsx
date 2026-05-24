@@ -135,7 +135,7 @@ export default function ListingDetailPage({ params }: PageProps) {
                 key={image.id}
                 onClick={() => setActiveImage(index)}
                 className={cn(
-                  "relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all",
+                  "relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all",
                   activeImage === index
                     ? "border-primary"
                     : "border-transparent opacity-60",
