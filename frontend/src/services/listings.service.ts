@@ -1,6 +1,16 @@
 import { Listing, ListingFilters, PaginatedResponse } from "@/types";
 import { api } from "./api";
 
+interface CreateListingPayload {
+  title: string;
+  description: string;
+  price: number;
+  city: string;
+  district?: string;
+  condition: "NEW" | "USED";
+  categoryId: string;
+}
+
 export const listingsService = {
   getAll: async (
     filters: ListingFilters = {},
@@ -14,12 +24,15 @@ export const listingsService = {
     return data;
   },
 
-  create: async (payload: FormData): Promise<Listing> => {
+  create: async (payload: CreateListingPayload): Promise<Listing> => {
     const { data } = await api.post("/listings", payload);
     return data;
   },
 
-  update: async (id: string, payload: Partial<Listing>): Promise<Listing> => {
+  update: async (
+    id: string,
+    payload: Partial<CreateListingPayload>,
+  ): Promise<Listing> => {
     const { data } = await api.patch(`/listings/${id}`, payload);
     return data;
   },
