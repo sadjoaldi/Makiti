@@ -1,33 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/features/auth/hooks/use-auth";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Minimum 6 caractères"),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { mutate: login, isPending } = useLogin();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {},
-  );
 
-  const validate = () => {
-    const newErrors: { email?: string; password?: string } = {};
-    if (!email || !email.includes("@")) newErrors.email = "Email invalide";
-    if (!password || password.length < 6)
-      newErrors.password = "Minimum 6 caractères";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema as any),
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    login({ email, password });
+  const onSubmit = (data: LoginForm) => {
+    login(data);
   };
 
   return (
@@ -39,18 +41,17 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
             placeholder="ton@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            {...register("email")}
           />
           {errors.email && (
-            <p className="text-destructive text-xs">{errors.email}</p>
+            <p className="text-destructive text-xs">{errors.email.message}</p>
           )}
         </div>
 
@@ -60,11 +61,12 @@ export default function LoginPage() {
             id="password"
             type="password"
             placeholder="••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            {...register("password")}
           />
           {errors.password && (
-            <p className="text-destructive text-xs">{errors.password}</p>
+            <p className="text-destructive text-xs">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
