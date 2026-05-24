@@ -1,5 +1,6 @@
 "use client";
 
+import { BottomNav } from "@/components/common/botton-nav";
 import { ListingGrid } from "@/components/listings/listing-grid";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useListings } from "@/features/listings/hooks/use-listings";
@@ -98,7 +99,7 @@ export default function SearchPage() {
       </div>
 
       {/* Résultats */}
-      <div className="pt-4 pb-8">
+      <div className="pt-4 pb-24">
         <div className="px-4 mb-3 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {data?.meta?.total ?? 0} résultat
@@ -119,6 +120,9 @@ export default function SearchPage() {
         </div>
         <ListingGrid listings={listings} isLoading={isLoading} />
       </div>
+
+      {/* Bottom Nav */}
+      <BottomNav />
     </div>
   );
 }

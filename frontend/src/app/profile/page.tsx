@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMyListings } from "@/features/listings/hooks/use-listings";
 import { useAuthStore } from "@/store/auth.store";
 import { ChevronRight, Heart, LogOut, Package, Settings } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -30,8 +31,17 @@ export default function ProfilePage() {
       <div className="pt-4 space-y-6 pb-8">
         {/* Avatar + infos */}
         <div className="px-4 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-black text-primary flex-shrink-0">
-            {user.firstName[0].toUpperCase()}
+          <div className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-black text-primary flex-shrink-0 overflow-hidden">
+            {user.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={user.firstName}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              user.firstName[0].toUpperCase()
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-lg truncate">

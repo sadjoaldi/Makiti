@@ -211,8 +211,17 @@ export default function ListingDetailPage({ params }: PageProps) {
         <div>
           <h2 className="font-bold mb-3">Vendeur</h2>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold">
-              {listing.user.firstName[0].toUpperCase()}
+            <div className="relative w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold overflow-hidden shrink-0">
+              {listing.user.avatar ? (
+                <Image
+                  src={listing.user.avatar}
+                  alt={listing.user.firstName}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                listing.user.firstName[0].toUpperCase()
+              )}
             </div>
             <div>
               <p className="font-medium">
