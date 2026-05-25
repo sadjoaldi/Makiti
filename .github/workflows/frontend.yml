@@ -3,12 +3,8 @@ name: Frontend CI
 on:
   push:
     branches: [main, develop]
-    paths:
-      - "frontend/**"
   pull_request:
     branches: [main]
-    paths:
-      - "frontend/**"
   workflow_dispatch:
 
 jobs:
@@ -48,9 +44,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      # - name: Lint
-      #   run: pnpm lint
 
       - name: Build
         run: pnpm build

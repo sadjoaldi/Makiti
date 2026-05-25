@@ -3,12 +3,8 @@ name: Backend CI
 on:
   push:
     branches: [main, develop]
-    paths:
-      - "backend/**"
   pull_request:
     branches: [main]
-    paths:
-      - "backend/**"
   workflow_dispatch:
 
 jobs:
@@ -53,9 +49,6 @@ jobs:
         run: pnpm dlx prisma generate
         env:
           DATABASE_URL: postgresql://makiti:makiti@localhost:5432/makiti_db
-
-      # - name: Lint
-      #   run: pnpm lint
 
       - name: Build
         run: pnpm build
