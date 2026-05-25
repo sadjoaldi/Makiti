@@ -24,7 +24,10 @@ interface CreateListingPayload {
 export const listingKeys = {
   all: ["listings"] as const,
   lists: () => [...listingKeys.all, "list"] as const,
-  list: (filters: ListingFilters) => [...listingKeys.lists(), filters] as const,
+  list: (filters: ListingFilters) =>
+    [...listingKeys.lists(), "paginated", filters] as const,
+  infinite: (filters: ListingFilters) =>
+    [...listingKeys.lists(), "infinite", filters] as const,
   details: () => [...listingKeys.all, "detail"] as const,
   detail: (slug: string) => [...listingKeys.details(), slug] as const,
   mine: () => [...listingKeys.all, "mine"] as const,
@@ -39,7 +42,7 @@ export function useListings(filters: ListingFilters = {}) {
 
 export function useInfiniteListings(filters: ListingFilters = {}) {
   return useInfiniteQuery({
-    queryKey: listingKeys.list(filters),
+    queryKey: listingKeys.infinite(filters),
     queryFn: ({ pageParam = 1 }) =>
       listingsService.getAll({ ...filters, page: pageParam as number }),
     initialPageParam: 1,

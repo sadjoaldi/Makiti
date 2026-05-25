@@ -51,6 +51,7 @@ export interface Listing {
     avatar?: string;
     city?: string;
     phone: string;
+    isVerified: boolean;
     createdAt?: string;
   };
 }

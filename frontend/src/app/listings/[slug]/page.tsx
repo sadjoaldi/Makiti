@@ -1,22 +1,34 @@
 "use client";
 
 import { MainLayout } from "@/components/common/main-layout";
+import { ListingCard } from "@/components/listings/listing-card";
 import { ManageListingSheet } from "@/components/listings/manage-listing-sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCheckFavorite,
   useToggleFavorite,
 } from "@/features/favorites/hooks/use-favorites";
-import { useListing } from "@/features/listings/hooks/use-listings";
+import {
+  useListing,
+  useListings,
+} from "@/features/listings/hooks/use-listings";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
 import { formatPrice, formatRelativeDate } from "@/utils/format";
 import {
   ArrowLeft,
   Calendar,
+  ChevronRight,
   Eye,
+  Flag,
   Heart,
   MapPin,
   Phone,
@@ -32,22 +44,38 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+const REPORT_REASONS = [
+  "Prix suspect",
+  "Contenu inapproprié",
+  "Arnaque / Fraude",
+  "Annonce dupliquée",
+  "Produit interdit",
+  "Autre",
+];
+
 export default function ListingDetailPage({ params }: PageProps) {
   const { slug } = use(params);
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [activeImage, setActiveImage] = useState(0);
   const [showPhone, setShowPhone] = useState(false);
+  const [showManageSheet, setShowManageSheet] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   const { data: listing, isLoading } = useListing(slug);
   const { data: favoriteData } = useCheckFavorite(listing?.id ?? "");
   const { mutate: toggleFavorite, isPending } = useToggleFavorite();
 
-  const isFavorited = favoriteData?.favorited ?? false;
+  const { data: similarData } = useListings({
+    categoryId: listing?.categoryId,
+    limit: 4,
+  });
 
-  const { user } = useAuthStore();
+  const similarListings =
+    similarData?.data.filter((l) => l.id !== listing?.id).slice(0, 4) ?? [];
+
+  const isFavorited = favoriteData?.favorited ?? false;
   const isOwner = user?.id === listing?.userId;
-  const [showManageSheet, setShowManageSheet] = useState(false);
 
   const handleFavorite = () => {
     if (!isAuthenticated) {
@@ -75,6 +103,11 @@ export default function ListingDetailPage({ params }: PageProps) {
       return;
     }
     setShowPhone(true);
+  };
+
+  const handleReport = (reason: string) => {
+    toast.success(`Signalement envoyé : ${reason}. Merci !`);
+    setShowReportDialog(false);
   };
 
   if (isLoading) return <ListingDetailSkeleton />;
@@ -127,7 +160,7 @@ export default function ListingDetailPage({ params }: PageProps) {
             />
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
-              Pas dimage
+              Pas d&apos;image
             </div>
           )}
         </div>
@@ -201,6 +234,17 @@ export default function ListingDetailPage({ params }: PageProps) {
         {/* Séparateur */}
         <div className="border-t border-border" />
 
+        {/* Signaler — visible uniquement si pas owner */}
+        {!isOwner && (
+          <button
+            onClick={() => setShowReportDialog(true)}
+            className="flex items-center gap-1 text-muted-foreground/80 hover:text-destructive transition-colors ml-auto"
+          >
+            <Flag className="w-3.5 h-3.5" />
+            <span className="text-xs">Signaler</span>
+          </button>
+        )}
+
         {/* Description */}
         <div>
           <h2 className="font-bold mb-2">Description</h2>
@@ -215,8 +259,11 @@ export default function ListingDetailPage({ params }: PageProps) {
         {/* Vendeur */}
         <div>
           <h2 className="font-bold mb-3">Vendeur</h2>
-          <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold overflow-hidden shrink-0">
+          <div
+            className="flex items-center gap-3 p-3 bg-muted rounded-xl cursor-pointer hover:bg-muted/80 transition-colors"
+            onClick={() => router.push(`/users/${listing.user.id}`)}
+          >
+            <div className="relative w-12 h-12 rounded-full bg-background flex items-center justify-center text-lg font-bold overflow-hidden shrink-0">
               {listing.user.avatar ? (
                 <Image
                   src={listing.user.avatar}
@@ -228,10 +275,20 @@ export default function ListingDetailPage({ params }: PageProps) {
                 listing.user.firstName[0].toUpperCase()
               )}
             </div>
-            <div>
-              <p className="font-medium">
-                {listing.user.firstName} {listing.user.lastName ?? ""}
-              </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="font-medium truncate">
+                  {listing.user.firstName} {listing.user.lastName ?? ""}
+                </p>
+                {listing.user.isVerified && (
+                  <span
+                    className="text-blue-500 shrink-0"
+                    title="Vendeur vérifié"
+                  >
+                    ✅
+                  </span>
+                )}
+              </div>
               {listing.user.city && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
@@ -239,8 +296,22 @@ export default function ListingDetailPage({ params }: PageProps) {
                 </p>
               )}
             </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </div>
         </div>
+
+        {/* Annonces similaires */}
+        {similarListings.length > 0 && (
+          <div>
+            <div className="border-t border-border mb-4" />
+            <h2 className="font-bold mb-3">Annonces similaires</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {similarListings.map((similar) => (
+                <ListingCard key={similar.id} listing={similar} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CTA fixe en bas */}
@@ -294,6 +365,29 @@ export default function ListingDetailPage({ params }: PageProps) {
           onClose={() => setShowManageSheet(false)}
         />
       )}
+
+      {/* Report Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent className="max-w-sm mx-4 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Signaler cette annonce</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Pourquoi tu signales cette annonce ?
+            </p>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 mt-2">
+            {REPORT_REASONS.map((reason) => (
+              <button
+                key={reason}
+                onClick={() => handleReport(reason)}
+                className="w-full text-left px-4 py-3 rounded-xl border border-border hover:bg-muted transition-colors text-sm font-medium"
+              >
+                {reason}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }

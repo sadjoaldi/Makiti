@@ -2,11 +2,13 @@
 
 import { BottomNav } from "@/components/common/botton-nav";
 import { ListingGrid } from "@/components/listings/listing-grid";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useListings } from "@/features/listings/hooks/use-listings";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store/ui.store";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, Search, SlidersHorizontal, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -17,6 +19,9 @@ export default function SearchPage() {
   const [selectedCategory, setSelectedCategory] = useState(
     filters.categoryId ?? "",
   );
+  const [showFilters, setShowFilters] = useState(false);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   const { data: categories } = useCategories();
   const { data, isLoading } = useListings(filters);
@@ -48,7 +53,7 @@ export default function SearchPage() {
         <div className="flex items-center gap-3 h-14 px-4">
           <button
             onClick={() => router.back()}
-            className="p-2 rounded-full hover:bg-muted transition-colors flex-shrink-0"
+            className="p-2 rounded-full hover:bg-muted transition-colors shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -79,6 +84,18 @@ export default function SearchPage() {
             className="flex gap-2 px-4 pb-3"
             style={{ width: "max-content" }}
           >
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn(
+                "p-2 rounded-full transition-colors shrink-0",
+                showFilters
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-muted",
+              )}
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+            </button>
+
             {categories?.map((category) => (
               <button
                 key={category.id}
@@ -97,6 +114,81 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
+
+      {/* Filtres prix */}
+      {showFilters && (
+        <div className="border-b border-border px-4 py-3 bg-background space-y-3">
+          <p className="text-sm font-medium">Fourchette de prix (GNF)</p>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="pr-8 h-9 text-sm"
+              />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                FG
+              </span>
+            </div>
+            <span className="text-muted-foreground">—</span>
+            <div className="relative flex-1">
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="pr-8 h-9 text-sm"
+              />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                FG
+              </span>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => {
+                setFilters({
+                  minPrice: minPrice ? parseFloat(minPrice) : undefined,
+                  maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+                });
+              }}
+              className="h-9 px-3"
+            >
+              OK
+            </Button>
+          </div>
+
+          {/* Tri */}
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Trier par</p>
+            <div className="flex gap-2">
+              {[
+                { value: "recent", label: "Récent" },
+                { value: "priceAsc", label: "Prix ↑" },
+                { value: "priceDesc", label: "Prix ↓" },
+              ].map((sort) => (
+                <button
+                  key={sort.value}
+                  onClick={() =>
+                    setFilters({
+                      sortBy: sort.value as "recent" | "priceAsc" | "priceDesc",
+                    })
+                  }
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                    filters.sortBy === sort.value
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {sort.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Résultats */}
       <div className="pt-4 pb-24">
