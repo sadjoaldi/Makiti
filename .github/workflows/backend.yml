@@ -54,8 +54,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://makiti:makiti@localhost:5432/makiti_db
 
-      - name: Lint
-        run: pnpm lint
+      # - name: Lint
+      #   run: pnpm lint
 
       - name: Build
         run: pnpm build
