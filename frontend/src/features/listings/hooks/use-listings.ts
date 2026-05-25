@@ -6,7 +6,20 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+
 import { toast } from "sonner";
+
+interface CreateListingPayload {
+  title: string;
+  description: string;
+  price: number;
+  city: string;
+  district?: string;
+  condition: "NEW" | "USED";
+  categoryId: string;
+  status?: string;
+}
 
 export const listingKeys = {
   all: ["listings"] as const,
@@ -63,6 +76,46 @@ export function useDeleteListing() {
     },
     onError: () => {
       toast.error("Erreur lors de la suppression");
+    },
+  });
+}
+
+export function useUpdateListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateListingPayload>;
+    }) => listingsService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: listingKeys.all });
+      toast.success("Annonce mise à jour ✅");
+    },
+    onError: () => {
+      toast.error("Erreur lors de la mise à jour");
+    },
+  });
+}
+
+export function useMarkAsSold() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      listingsService.update(id, { status: "SOLD" } as any),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: listingKeys.all });
+      toast.success("Annonce marquée comme vendue ✅");
+      router.push("/profile/listings");
+    },
+    onError: () => {
+      toast.error("Erreur lors de la mise à jour");
     },
   });
 }
