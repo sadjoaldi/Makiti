@@ -15,16 +15,16 @@ async function main() {
   // ─── Categories ───────────────────────────────────────────
 
   const categories = [
-    { name: 'Électronique', slug: 'electronique', icon: '📱' },
-    { name: 'Véhicules', slug: 'vehicules', icon: '🚗' },
-    { name: 'Immobilier', slug: 'immobilier', icon: '🏠' },
-    { name: 'Mode & Vêtements', slug: 'mode-vetements', icon: '👗' },
-    { name: 'Maison & Jardin', slug: 'maison-jardin', icon: '🛋️' },
-    { name: 'Sports & Loisirs', slug: 'sports-loisirs', icon: '⚽' },
-    { name: 'Emploi', slug: 'emploi', icon: '💼' },
-    { name: 'Services', slug: 'services', icon: '🔧' },
-    { name: 'Animaux', slug: 'animaux', icon: '🐾' },
-    { name: 'Autres', slug: 'autres', icon: '📦' },
+    { name: 'Électronique', slug: 'electronique', icon: '📱', order: 1 },
+    { name: 'Alimentation', slug: 'alimentation', icon: '🍎', order: 2 },
+    { name: 'Véhicules', slug: 'vehicules', icon: '🚗', order: 3 },
+    { name: 'Immobilier', slug: 'immobilier', icon: '🏠', order: 4 },
+    { name: 'Mode & Vêtements', slug: 'mode-vetements', icon: '👗', order: 5 },
+    { name: 'Maison & Jardin', slug: 'maison-jardin', icon: '🛋️', order: 6 },
+    { name: 'Services', slug: 'services', icon: '🔧', order: 7 },
+    { name: 'Emploi', slug: 'emploi', icon: '💼', order: 8 },
+    { name: 'Sports & Loisirs', slug: 'sports-loisirs', icon: '⚽', order: 9 },
+    { name: 'Autres', slug: 'autres', icon: '📦', order: 10 },
   ];
 
   for (const category of categories) {

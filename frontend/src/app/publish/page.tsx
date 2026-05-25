@@ -7,6 +7,7 @@ import { useCategories } from "@/features/categories/hooks/use-categories";
 import { usePublishListing } from "@/features/listings/hooks/use-publish";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
+import { compressImage, formatFileSize } from "@/utils/image";
 import { ArrowLeft, Camera, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -70,7 +71,7 @@ export default function PublishPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleImages = (files: FileList | null) => {
+  const handleImages = async (files: FileList | null) => {
     if (!files) return;
 
     const newFiles = Array.from(files);
@@ -89,9 +90,25 @@ export default function PublishPage() {
       toast.error("Formats acceptés : JPG, PNG, WebP");
     }
 
-    const newPreviews = validFiles.map((f) => URL.createObjectURL(f));
-    setForm((prev) => ({ ...prev, images: [...prev.images, ...validFiles] }));
+    // Compression
+    toast.loading("Compression des images...");
+    const compressedFiles = await Promise.all(
+      validFiles.map((f) => compressImage(f)),
+    );
+    toast.dismiss();
+
+    const newPreviews = compressedFiles.map((f) => URL.createObjectURL(f));
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, ...compressedFiles],
+    }));
     setPreviews((prev) => [...prev, ...newPreviews]);
+
+    // Info taille
+    const totalSize = compressedFiles.reduce((acc, f) => acc + f.size, 0);
+    toast.success(
+      `${compressedFiles.length} image(s) — ${formatFileSize(totalSize)}`,
+    );
   };
 
   const removeImage = (index: number) => {
@@ -353,7 +370,7 @@ export default function PublishPage() {
               accept="image/jpeg,image/png,image/webp"
               multiple
               className="hidden"
-              onChange={(e) => handleImages(e.target.files)}
+              onChange={(e) => void handleImages(e.target.files)}
             />
 
             {/* Previews */}

@@ -53,9 +53,12 @@ model Category {
   name      String   @unique
   slug      String   @unique
   icon      String?
+  order Int @default(0)
   createdAt DateTime @default(now())
 
   listings Listing[]
+
+  @@index([order])
 }
 
 model Listing {

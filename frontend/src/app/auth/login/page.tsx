@@ -17,9 +17,15 @@ export default function LoginPage() {
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
-    if (!email || !email.includes("@")) newErrors.email = "Email invalide";
-    if (!password || password.length < 6)
+
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      newErrors.email = "Email invalide";
+    }
+
+    if (!password || password.length < 6) {
       newErrors.password = "Minimum 6 caractères";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

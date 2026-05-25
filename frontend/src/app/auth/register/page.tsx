@@ -12,8 +12,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-// ─── Schemas ──────────────────────────────────────────────
-
 const step1Schema = z.object({
   phone: z.string().min(8, "Numéro invalide"),
 });
@@ -24,8 +22,12 @@ const step2Schema = z.object({
 
 const step3Schema = z.object({
   firstName: z.string().min(2, "Prénom requis"),
-  email: z.string().email("Email invalide"),
-  password: z.string().min(6, "Minimum 6 caractères"),
+  email: z.string().email("Email invalide").min(5, "Email invalide"),
+  password: z
+    .string()
+    .min(6, "Minimum 6 caractères")
+    .regex(/[A-Z]/, "Au moins une majuscule")
+    .regex(/[0-9]/, "Au moins un chiffre"),
 });
 
 type Step1Form = z.infer<typeof step1Schema>;
@@ -40,20 +42,26 @@ export default function RegisterPage() {
   const { mutate: sendOtp, isPending: isSendingOtp } = useSendOtp();
   const { mutate: register, isPending: isRegistering } = useRegister();
 
-  // Step 1 — Téléphone
   const step1Form = useForm<Step1Form>({
     resolver: zodResolver(step1Schema as any),
   });
 
-  // Step 2 — OTP
   const step2Form = useForm<Step2Form>({
     resolver: zodResolver(step2Schema as any),
   });
 
-  // Step 3 — Infos
   const step3Form = useForm<Step3Form>({
     resolver: zodResolver(step3Schema as any),
   });
+
+  const passwordValue = step3Form.watch("password") ?? "";
+
+  const passwordChecks = [
+    passwordValue.length >= 6,
+    /[A-Z]/.test(passwordValue),
+    /[0-9]/.test(passwordValue),
+    passwordValue.length >= 10,
+  ];
 
   const handleStep1 = (data: Step1Form) => {
     setPhone(data.phone);
@@ -116,7 +124,7 @@ export default function RegisterPage() {
           <div>
             <p className="font-medium mb-1">Ton numéro de téléphone</p>
             <p className="text-sm text-muted-foreground">
-              On tenvoie un code de vérification par SMS
+              On t&apos;envoie un code de vérification par SMS
             </p>
           </div>
 
@@ -241,6 +249,25 @@ export default function RegisterPage() {
               <p className="text-destructive text-xs">
                 {step3Form.formState.errors.password.message}
               </p>
+            )}
+
+            {/* Password strength */}
+            {passwordValue && (
+              <div className="space-y-1">
+                <div className="flex gap-1">
+                  {passwordChecks.map((ok, i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-all ${
+                        ok ? "bg-green-500" : "bg-muted"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Majuscule · Chiffre · 6 caractères min · 10+ caractères
+                </p>
+              </div>
             )}
           </div>
 
