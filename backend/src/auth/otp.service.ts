@@ -1,9 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import AfricasTalking from 'africastalking';
 import { PrismaService } from '../prisma/prisma.service';
-
-const AfricasTalking = require('africastalking');
 
 @Injectable()
 export class OtpService {
