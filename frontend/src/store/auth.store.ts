@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "makiti-auth",
-      partialState: (state) => ({
+      partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,

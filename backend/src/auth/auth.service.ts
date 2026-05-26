@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ConflictException,
   Injectable,
@@ -34,7 +35,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    const { otpCode: _, ...userData } = dto;
+    const { otpCode: _otpCode, ...userData } = dto;
 
     const user = await this.prisma.user.create({
       data: {

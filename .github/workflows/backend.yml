@@ -3,12 +3,9 @@ name: Backend CI
 on:
   push:
     branches: [main, develop]
-    paths:
-      - "backend/**"
   pull_request:
     branches: [main]
-    paths:
-      - "backend/**"
+  workflow_dispatch:
 
 jobs:
   lint-and-build:
@@ -48,13 +45,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Generate Prisma Client
         run: pnpm dlx prisma generate
         env:
           DATABASE_URL: postgresql://makiti:makiti@localhost:5432/makiti_db
-
-      - name: Lint
-        run: pnpm lint
 
       - name: Build
         run: pnpm build

@@ -3,12 +3,9 @@ name: Frontend CI
 on:
   push:
     branches: [main, develop]
-    paths:
-      - "frontend/**"
   pull_request:
     branches: [main]
-    paths:
-      - "frontend/**"
+  workflow_dispatch:
 
 jobs:
   lint-and-build:
@@ -50,7 +47,6 @@ jobs:
 
       - name: Lint
         run: pnpm lint
-
       - name: Build
         run: pnpm build
         env:
