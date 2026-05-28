@@ -21,6 +21,7 @@ import {
   useListings,
 } from "@/features/listings/hooks/use-listings";
 import { cn } from "@/lib/utils";
+import { api } from "@/services/api";
 import { useAuthStore } from "@/store/auth.store";
 import { formatPrice, formatRelativeDate } from "@/utils/format";
 import {
@@ -105,8 +106,19 @@ export default function ListingDetailPage({ params }: PageProps) {
     setShowPhone(true);
   };
 
-  const handleReport = (reason: string) => {
-    toast.success(`Signalement envoyé : ${reason}. Merci !`);
+  const handleReport = async (reason: string) => {
+    if (!isAuthenticated) {
+      toast.error("Connecte-toi pour signaler");
+      setShowReportDialog(false);
+      router.push("/auth/login");
+      return;
+    }
+    try {
+      await api.post(`/listings/${listing?.id}/report`, { reason });
+      toast.success("Signalement envoyé, merci !");
+    } catch {
+      toast.error("Erreur lors du signalement");
+    }
     setShowReportDialog(false);
   };
 

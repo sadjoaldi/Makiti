@@ -6,17 +6,32 @@ import { cn } from "@/lib/utils";
 import { adminService } from "@/services/admin.service";
 import { formatDate } from "@/utils/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Search, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [search]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin", "users", page],
-    queryFn: () => adminService.getAllUsers({ page, limit: 20 }),
+    queryKey: ["admin", "users", debouncedSearch, page],
+    queryFn: () =>
+      adminService.getAllUsers({
+        page,
+        limit: 20,
+        search: debouncedSearch || undefined,
+      }),
   });
 
   const { mutate: toggleVerified } = useMutation({
@@ -44,6 +59,17 @@ export default function AdminUsersPage() {
         </span>
       </div>
 
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Rechercher par nom, email ou téléphone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-muted rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
       <div className="space-y-3">
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (
@@ -54,12 +80,10 @@ export default function AdminUsersPage() {
                 key={user.id}
                 className="bg-background border border-border rounded-xl p-3 flex items-center gap-3"
               >
-                {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-black text-primary shrink-0">
                   {user.firstName[0].toUpperCase()}
                 </div>
 
-                {/* Infos */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="font-medium text-sm truncate">
@@ -80,7 +104,6 @@ export default function AdminUsersPage() {
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <span
                     className={cn(
@@ -124,7 +147,6 @@ export default function AdminUsersPage() {
             ))}
       </div>
 
-      {/* Pagination */}
       {data && data.meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-2">
           <Button

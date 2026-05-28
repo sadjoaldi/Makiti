@@ -14,6 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CreateListingDto } from './dto/create-listing.dto';
+import { CreateReportDto } from './dto/create-report.dto';
 import { QueryListingDto } from './dto/query-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { ListingsService } from './listings.service';
@@ -59,5 +60,15 @@ export class ListingsController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: User) {
     return this.listingsService.remove(id, user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/report')
+  report(
+    @Param('id') id: string,
+    @Body() dto: CreateReportDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.listingsService.report(id, dto.reason, user.id);
   }
 }

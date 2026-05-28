@@ -184,4 +184,15 @@ export class ListingsService {
 
     return slug;
   }
+
+  async report(listingId: string, reason: string, userId: string) {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: listingId },
+    });
+    if (!listing) throw new NotFoundException('Annonce introuvable');
+
+    return this.prisma.report.create({
+      data: { listingId, reason, userId },
+    });
+  }
 }

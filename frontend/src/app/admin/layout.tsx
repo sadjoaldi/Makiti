@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
 import {
   ChevronRight,
+  Flag,
   LayoutDashboard,
   LogOut,
   Package,
@@ -17,6 +18,7 @@ const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/listings", icon: Package, label: "Annonces" },
   { href: "/admin/users", icon: Users, label: "Utilisateurs" },
+  { href: "/admin/reports", icon: Flag, label: "Signalements" },
 ];
 
 export default function AdminLayout({

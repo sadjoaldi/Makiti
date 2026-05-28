@@ -5,19 +5,43 @@ type AdminUser = Omit<User, "password"> & {
   _count: { listings: number };
 };
 
+interface AdminStats {
+  totalUsers: number;
+  newUsersToday: number;
+  totalListings: number;
+  activeListings: number;
+  soldListings: number;
+  newListingsToday: number;
+  pendingReports: number;
+  topCategories: { name: string; icon?: string; count: number }[];
+}
+
+interface Report {
+  id: string;
+  reason: string;
+  status: string;
+  createdAt: string;
+  listing: {
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+    images: { url: string }[];
+  };
+  user: {
+    id: string;
+    firstName: string;
+    lastName?: string;
+    email: string;
+  };
+}
+
 export const adminService = {
-  // Stats
-  getStats: async (): Promise<{
-    totalUsers: number;
-    totalListings: number;
-    activeListings: number;
-    soldListings: number;
-  }> => {
+  getStats: async (): Promise<AdminStats> => {
     const { data } = await api.get("/admin/stats");
     return data;
   },
 
-  // Listings
   getAllListings: async (params: {
     page?: number;
     limit?: number;
@@ -38,10 +62,10 @@ export const adminService = {
     await api.delete(`/admin/listings/${id}`);
   },
 
-  // Users
   getAllUsers: async (params: {
     page?: number;
     limit?: number;
+    search?: string;
   }): Promise<PaginatedResponse<AdminUser>> => {
     const { data } = await api.get("/admin/users", { params });
     return data;
@@ -54,5 +78,19 @@ export const adminService = {
 
   deleteUser: async (id: string): Promise<void> => {
     await api.delete(`/admin/users/${id}`);
+  },
+
+  getReports: async (params: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<PaginatedResponse<Report>> => {
+    const { data } = await api.get("/admin/reports", { params });
+    return data;
+  },
+
+  updateReportStatus: async (id: string, status: string): Promise<Report> => {
+    const { data } = await api.patch(`/admin/reports/${id}/status`, { status });
+    return data;
   },
 };

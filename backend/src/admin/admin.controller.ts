@@ -70,11 +70,13 @@ export class AdminController {
     @Request() req: RequestWithUser,
     @Query('page') page = '1',
     @Query('limit') limit = '20',
+    @Query('search') search?: string,
   ) {
     this.checkAdmin(req);
     return this.adminService.getAllUsers({
       page: parseInt(page),
       limit: parseInt(limit),
+      search,
     });
   }
 
@@ -88,5 +90,30 @@ export class AdminController {
   deleteUser(@Request() req: RequestWithUser, @Param('id') id: string) {
     this.checkAdmin(req);
     return this.adminService.deleteUser(id);
+  }
+
+  @Get('reports')
+  getReports(
+    @Request() req: RequestWithUser,
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+    @Query('status') status?: string,
+  ) {
+    this.checkAdmin(req);
+    return this.adminService.getReports({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      status,
+    });
+  }
+
+  @Patch('reports/:id/status')
+  updateReportStatus(
+    @Request() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body('status') status: string,
+  ) {
+    this.checkAdmin(req);
+    return this.adminService.updateReportStatus(id, status);
   }
 }

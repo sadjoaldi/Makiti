@@ -44,6 +44,8 @@ model User {
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
+  reports Report []
+
   @@index([email])
   @@index([phone])
 }
@@ -88,6 +90,8 @@ model Listing {
   images    ListingImage[]
   favorites Favorite[]
   messages  Message[]
+
+  reports Report []
 
   @@index([slug])
   @@index([categoryId])
@@ -143,4 +147,26 @@ model OtpCode {
   createdAt DateTime @default(now())
 
   @@index([phone])
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  reason    String
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime @default(now())
+
+  listingId String
+  userId    String
+
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([listingId])
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
 }
