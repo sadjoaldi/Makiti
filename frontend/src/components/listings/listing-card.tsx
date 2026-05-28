@@ -38,7 +38,7 @@ export function ListingCard({ listing }: ListingCardProps) {
 
   return (
     <Link href={`/listings/${listing.slug}`} className="block">
-      <div className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow">
+      <div className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md lg:hover:shadow-lg lg:hover:-translate-y-0.5 transition-all duration-200">
         {/* Image */}
         <div className="relative aspect-square bg-muted">
           {image ? (

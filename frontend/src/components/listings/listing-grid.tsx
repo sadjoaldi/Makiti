@@ -29,7 +29,7 @@ export function ListingGrid({ listings, isLoading }: ListingGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 px-4">
+    <div className="grid grid-cols-2 gap-3 px-4 lg:grid-cols-4 lg:px-0">
       {listings.map((listing) => (
         <ListingCard key={listing.id} listing={listing} />
       ))}
