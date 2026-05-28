@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/common/password-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,30 +12,29 @@ export default function LoginPage() {
   const { mutate: login, isPending } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
   );
+  const [identifier, setIdentifier] = useState("");
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
-
-    if (!email || !email.includes("@") || !email.includes(".")) {
+    if (!identifier) {
+      newErrors.email = "Email ou téléphone requis";
+    } else if (!identifier.includes("@")) {
       newErrors.email = "Email invalide";
     }
-
     if (!password || password.length < 6) {
       newErrors.password = "Minimum 6 caractères";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleLogin = () => {
     if (!validate()) return;
-    login({ email, password });
+    login({ identifier, password, rememberMe });
   };
 
   return (
@@ -46,16 +46,19 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="identifier">Email ou téléphone</Label>
           <Input
-            id="email"
-            type="email"
-            placeholder="ton@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            id="identifier"
+            type="text"
+            placeholder="ton@email.com ou +224620000000"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            autoComplete="username"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLogin();
+            }}
           />
           {errors.email && (
             <p className="text-destructive text-xs">{errors.email}</p>
@@ -64,27 +67,43 @@ export default function LoginPage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">Mot de passe</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             placeholder="••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLogin();
+            }}
           />
           {errors.password && (
             <p className="text-destructive text-xs">{errors.password}</p>
           )}
         </div>
 
+        {/* Se souvenir de moi */}
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="w-4 h-4 rounded border-border accent-primary"
+          />
+          <span className="text-sm text-muted-foreground">
+            Se souvenir de moi
+          </span>
+        </label>
+
         <Button
-          type="submit"
+          type="button"
+          onClick={handleLogin}
           className="w-full h-12 font-bold"
           disabled={isPending}
         >
           {isPending ? "Connexion..." : "Se connecter"}
         </Button>
-      </form>
+      </div>
 
       <p className="text-center text-sm text-muted-foreground">
         Pas encore de compte ?{" "}

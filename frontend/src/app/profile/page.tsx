@@ -5,7 +5,14 @@ import { ListingCard } from "@/components/listings/listing-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyListings } from "@/features/listings/hooks/use-listings";
 import { useAuthStore } from "@/store/auth.store";
-import { ChevronRight, Heart, LogOut, Package, Settings } from "lucide-react";
+import {
+  ChevronRight,
+  Heart,
+  Key,
+  LogOut,
+  Package,
+  Settings,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -31,7 +38,7 @@ export default function ProfilePage() {
       <div className="pt-4 space-y-6 pb-8">
         {/* Avatar + infos */}
         <div className="px-4 flex items-center gap-4">
-          <div className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-black text-primary flex-shrink-0 overflow-hidden">
+          <div className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-black text-primary shrink-0 overflow-hidden">
             {user.avatar ? (
               <Image
                 src={user.avatar}
@@ -103,6 +110,17 @@ export default function ProfilePage() {
             <Settings className="w-5 h-5 text-muted-foreground" />
             <span className="flex-1 text-left font-medium text-sm">
               Modifier mon profil
+            </span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+
+          <button
+            onClick={() => router.push("/profile/password")}
+            className="w-full flex items-center gap-3 p-4 bg-muted rounded-xl hover:bg-muted/80 transition-colors"
+          >
+            <Key className="w-5 h-5 text-muted-foreground" />
+            <span className="flex-1 text-left font-medium text-sm">
+              Modifier mon mot de passe
             </span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>

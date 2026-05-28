@@ -53,8 +53,11 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    // Cherche par email ou téléphone
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: dto.identifier }, { phone: dto.identifier }],
+      },
     });
 
     if (!user) throw new UnauthorizedException('Identifiants invalides');
@@ -66,7 +69,7 @@ export class AuthService {
     const { password: _password, ...result } = user;
     return {
       user: result,
-      accessToken: this.generateToken(user.id, user.email),
+      accessToken: this.generateToken(user.id, user.email, dto.rememberMe),
     };
   }
 
@@ -91,7 +94,10 @@ export class AuthService {
     return user;
   }
 
-  private generateToken(userId: string, email: string) {
-    return this.jwtService.sign({ sub: userId, email });
+  private generateToken(userId: string, email: string, rememberMe?: boolean) {
+    return this.jwtService.sign(
+      { sub: userId, email },
+      { expiresIn: rememberMe ? '30d' : '7d' },
+    );
   }
 }

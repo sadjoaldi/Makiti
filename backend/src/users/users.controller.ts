@@ -3,6 +3,7 @@ import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
@@ -31,5 +32,11 @@ export class UsersController {
   @Get(':id/listings')
   findUserListings(@Param('id') id: string) {
     return this.usersService.findUserListings(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/password')
+  changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
+    return this.usersService.changePassword(user.id, dto);
   }
 }

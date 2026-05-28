@@ -44,7 +44,9 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: process.env.ADMIN_EMAIL || 'admin@makiti.com' },
-    update: {},
+    update: {
+      password: adminPassword,
+    },
     create: {
       email: process.env.ADMIN_EMAIL || 'admin@makiti.com',
       phone: process.env.ADMIN_PHONE || '+224600000000',

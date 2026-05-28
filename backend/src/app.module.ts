@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -33,6 +34,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     UploadsModule,
     FavoritesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

@@ -11,9 +11,10 @@ interface RegisterPayload {
   otpCode: string;
 }
 
-interface LoginPayload {
-  email: string;
+export interface LoginPayload {
+  identifier: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 interface AuthResponse {

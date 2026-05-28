@@ -1,4 +1,4 @@
-import { authService } from "@/services/auth.service";
+import { authService, LoginPayload } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -47,7 +47,7 @@ export function useLogin() {
   const { login } = useAuthStore();
 
   return useMutation({
-    mutationFn: authService.login,
+    mutationFn: (payload: LoginPayload) => authService.login(payload),
     onSuccess: (data) => {
       login(data.user, data.accessToken);
       toast.success(`Bon retour ${data.user.firstName} !`);
