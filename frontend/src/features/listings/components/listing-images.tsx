@@ -20,7 +20,9 @@ export function ListingImages({ listing }: ListingImagesProps) {
             src={listing.images[activeImage].url}
             alt={listing.title}
             fill
-            className="object-cover"
+            className="object-contain"
+            sizes="(max-width: 1024px) 100vw, 52vw"
+            quality={90}
             priority
           />
         ) : (
@@ -48,6 +50,7 @@ export function ListingImages({ listing }: ListingImagesProps) {
                 alt={`Image ${index + 1}`}
                 fill
                 className="object-cover"
+                sizes="80px"
               />
             </button>
           ))}
