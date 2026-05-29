@@ -3,6 +3,7 @@
 import { MainLayout } from "@/components/common/main-layout";
 import { ListingCard } from "@/components/listings/listing-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useMyListings } from "@/features/listings/hooks/use-listings";
 import { useAuthStore } from "@/store/auth.store";
 import {
@@ -15,18 +16,14 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { data: myListings, isLoading } = useMyListings();
+  const { ready } = useRequireAuth();
 
-  useEffect(() => {
-    if (!isAuthenticated) router.push("/auth/login");
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated || !user) return null;
+  if (!ready || !user) return null;
 
   const handleLogout = () => {
     logout();

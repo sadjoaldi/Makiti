@@ -4,6 +4,7 @@ import { Header } from "@/components/common/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import {
   useUpdateAvatar,
   useUpdateProfile,
@@ -13,7 +14,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { ArrowLeft, Camera } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const GUINEE_CITIES = [
   "Conakry",
@@ -30,7 +31,8 @@ const GUINEE_CITIES = [
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
+  const { ready } = useRequireAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { mutate: updateProfile, isPending } = useUpdateProfile();
@@ -44,11 +46,7 @@ export default function EditProfilePage() {
     district: user?.district ?? "",
   });
 
-  useEffect(() => {
-    if (!isAuthenticated) router.push("/auth/login");
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated || !user) return null;
+  if (!ready || !user) return null;
 
   const updateField = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));

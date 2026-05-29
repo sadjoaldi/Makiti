@@ -1,25 +1,14 @@
 "use client";
 
 import { BottomNav } from "@/components/common/botton-nav";
+import { EmptyState } from "@/components/common/empty-state";
 import { Header } from "@/components/common/header";
 import { ListingGrid } from "@/components/listings/listing-grid";
 import { useMyFavorites } from "@/features/favorites/hooks/use-favorites";
 import { useAuthStore } from "@/store/auth.store";
-import { ArrowLeft, Heart } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
-      <Heart className="w-12 h-12 opacity-20" />
-      <p className="font-medium">Aucun favori pour l&apos;instant</p>
-      <p className="text-sm">
-        Appuie sur ❤️ sur une annonce pour la sauvegarder
-      </p>
-    </div>
-  );
-}
 
 export default function FavoritesPage() {
   const router = useRouter();
@@ -51,7 +40,12 @@ export default function FavoritesPage() {
         </div>
         <div className="pt-4 pb-24">
           {isEmpty ? (
-            <EmptyState />
+            <EmptyState
+              icon="❤️"
+              message="Aucun favori pour l'instant"
+              actionLabel="Explorer les annonces"
+              onAction={() => router.push("/")}
+            />
           ) : (
             <ListingGrid listings={favorites} isLoading={isLoading} />
           )}
@@ -72,7 +66,12 @@ export default function FavoritesPage() {
             )}
           </div>
           {isEmpty ? (
-            <EmptyState />
+            <EmptyState
+              icon="❤️"
+              message="Aucun favori pour l'instant"
+              actionLabel="Explorer les annonces"
+              onAction={() => router.push("/")}
+            />
           ) : (
             <ListingGrid listings={favorites} isLoading={isLoading} />
           )}

@@ -4,10 +4,11 @@ import { Header } from "@/components/common/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import { usePublishListing } from "@/features/listings/hooks/use-publish";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/store/auth.store";
+
 import { compressImage, formatFileSize } from "@/utils/image";
 import { ArrowLeft, Camera, Check, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
@@ -50,10 +51,10 @@ interface FormData {
 
 export default function PublishPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
   const { data: categories } = useCategories();
   const { mutate: publish, isPending } = usePublishListing();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { ready } = useRequireAuth();
 
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<FormData>({
@@ -69,10 +70,7 @@ export default function PublishPage() {
 
   const [previews, setPreviews] = useState<string[]>([]);
 
-  if (!isAuthenticated) {
-    router.push("/auth/login");
-    return null;
-  }
+  if (!ready) return null;
 
   const updateForm = (key: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));

@@ -1,10 +1,11 @@
 "use client";
 
+import { Header } from "@/components/common/header";
 import { PasswordInput } from "@/components/common/password-input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useRequireAuth } from "@/features/auth/hooks/use-require-auth";
 import { api } from "@/services/api";
-import { useAuthStore } from "@/store/auth.store";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,7 +13,7 @@ import { toast } from "sonner";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { ready } = useRequireAuth();
   const [form, setForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -21,10 +22,7 @@ export default function ChangePasswordPage() {
   const [isPending, setIsPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  if (!isAuthenticated) {
-    router.push("/auth/login");
-    return null;
-  }
+  if (!ready) return null;
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -58,97 +56,131 @@ export default function ChangePasswordPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background max-w-lg mx-auto">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border">
-        <div className="flex items-center h-14 px-4 gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 rounded-full hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="font-bold flex-1">Modifier le mot de passe</h1>
-        </div>
+  // Champs — partagé mobile + desktop
+  const fields = (
+    <>
+      <div className="space-y-2">
+        <Label>Mot de passe actuel</Label>
+        <PasswordInput
+          placeholder="••••••"
+          value={form.currentPassword}
+          onChange={(e) =>
+            setForm((p) => ({ ...p, currentPassword: e.target.value }))
+          }
+        />
+        {errors.currentPassword && (
+          <p className="text-destructive text-xs">{errors.currentPassword}</p>
+        )}
       </div>
 
-      <div className="px-4 py-6 space-y-4 pb-32">
-        <div className="space-y-2">
-          <Label>Mot de passe actuel</Label>
-          <PasswordInput
-            placeholder="••••••"
-            value={form.currentPassword}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, currentPassword: e.target.value }))
-            }
-          />
-          {errors.currentPassword && (
-            <p className="text-destructive text-xs">{errors.currentPassword}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label>Nouveau mot de passe</Label>
-          <PasswordInput
-            placeholder="••••••"
-            value={form.newPassword}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, newPassword: e.target.value }))
-            }
-          />
-          {errors.newPassword && (
-            <p className="text-destructive text-xs">{errors.newPassword}</p>
-          )}
-          {/* Password strength */}
-          {form.newPassword && (
-            <div className="space-y-1">
-              <div className="flex gap-1">
-                {[
-                  form.newPassword.length >= 6,
-                  /[A-Z]/.test(form.newPassword),
-                  /[0-9]/.test(form.newPassword),
-                  form.newPassword.length >= 10,
-                ].map((ok, i) => (
-                  <div
-                    key={i}
-                    className={`h-1 flex-1 rounded-full transition-all ${
-                      ok ? "bg-green-500" : "bg-muted"
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Majuscule · Chiffre · 6 min · 10+ caractères
-              </p>
+      <div className="space-y-2">
+        <Label>Nouveau mot de passe</Label>
+        <PasswordInput
+          placeholder="••••••"
+          value={form.newPassword}
+          onChange={(e) =>
+            setForm((p) => ({ ...p, newPassword: e.target.value }))
+          }
+        />
+        {errors.newPassword && (
+          <p className="text-destructive text-xs">{errors.newPassword}</p>
+        )}
+        {form.newPassword && (
+          <div className="space-y-1">
+            <div className="flex gap-1">
+              {[
+                form.newPassword.length >= 6,
+                /[A-Z]/.test(form.newPassword),
+                /[0-9]/.test(form.newPassword),
+                form.newPassword.length >= 10,
+              ].map((ok, i) => (
+                <div
+                  key={i}
+                  className={`h-1 flex-1 rounded-full transition-all ${ok ? "bg-green-500" : "bg-muted"}`}
+                />
+              ))}
             </div>
-          )}
+            <p className="text-xs text-muted-foreground">
+              Majuscule · Chiffre · 6 min · 10+ caractères
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Confirmer le nouveau mot de passe</Label>
+        <PasswordInput
+          placeholder="••••••"
+          value={form.confirmPassword}
+          onChange={(e) =>
+            setForm((p) => ({ ...p, confirmPassword: e.target.value }))
+          }
+        />
+        {errors.confirmPassword && (
+          <p className="text-destructive text-xs">{errors.confirmPassword}</p>
+        )}
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* ───── MOBILE ───── */}
+      <div className="lg:hidden max-w-lg mx-auto">
+        <div className="sticky top-0 z-40 bg-background border-b border-border">
+          <div className="flex items-center h-14 px-4 gap-3">
+            <button
+              onClick={() => router.back()}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="font-bold flex-1">Modifier le mot de passe</h1>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Confirmer le nouveau mot de passe</Label>
-          <PasswordInput
-            placeholder="••••••"
-            value={form.confirmPassword}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, confirmPassword: e.target.value }))
-            }
-          />
-          {errors.confirmPassword && (
-            <p className="text-destructive text-xs">{errors.confirmPassword}</p>
-          )}
+        <div className="px-4 py-6 space-y-4 pb-32">{fields}</div>
+
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 max-w-lg mx-auto">
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isPending}
+            className="w-full h-12 font-bold"
+          >
+            {isPending ? "Modification..." : "Modifier le mot de passe"}
+          </Button>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 max-w-lg mx-auto">
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isPending}
-          className="w-full h-12 font-bold"
-        >
-          {isPending ? "Modification..." : "Modifier le mot de passe"}
-        </Button>
+      {/* ───── DESKTOP ───── */}
+      <div className="hidden lg:block">
+        <Header />
+        <main className="max-w-xl mx-auto px-6 py-8">
+          <div className="flex items-center gap-3 mb-6">
+            <button
+              onClick={() => router.back()}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-2xl font-black">Modifier le mot de passe</h1>
+          </div>
+
+          <div className="bg-background border border-border rounded-2xl p-8 space-y-4">
+            {fields}
+            <div className="pt-2">
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isPending}
+                className="w-full h-12 font-bold"
+              >
+                {isPending ? "Modification..." : "Modifier le mot de passe"}
+              </Button>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
