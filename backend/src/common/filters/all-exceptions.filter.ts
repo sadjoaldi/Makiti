@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 import { Request, Response } from 'express';
 
 @Catch()
@@ -17,36 +18,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // Détermine le status HTTP
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // Message d'erreur
     const message =
       exception instanceof HttpException
         ? exception.getResponse()
         : 'Erreur interne du serveur';
 
-    // Log SANS le body (qui peut contenir password, otp, etc.)
-    // On logge uniquement : méthode, route, status, message
     const logContext = `${request.method} ${request.url} → ${status}`;
 
     if (status >= 500) {
-      // Erreurs serveur : log complet avec stack pour debug
       this.logger.error(
         logContext,
         exception instanceof Error ? exception.stack : String(exception),
       );
+      // Envoie uniquement les erreurs serveur (5xx) à Sentry
+      Sentry.captureException(exception);
     } else {
-      // Erreurs client (4xx) : log léger
       this.logger.warn(
         `${logContext} — ${typeof message === 'string' ? message : JSON.stringify(message)}`,
       );
     }
 
-    // Réponse au client
     response.status(status).json(
       typeof message === 'object'
         ? message
