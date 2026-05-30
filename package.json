@@ -1,8 +1,10 @@
 {
   "name": "makiti",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Marketplace de petites annonces pour la Guinée",
+  "author": "Alhassane Diallo",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
     "dev": "docker compose up --build",
     "dev:db": "docker compose up postgres -d",
@@ -16,7 +18,5 @@
     "lint": "pnpm -r lint"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.33.3"
 }

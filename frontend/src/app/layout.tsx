@@ -14,9 +14,46 @@ export const viewport: Viewport = {
   themeColor: "#10b981",
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makiti.gn";
+
 export const metadata: Metadata = {
-  title: "Makiti — Marketplace Guinée",
-  description: "Achetez et vendez facilement en Guinée",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Makiti — Petites annonces en Guinée",
+    template: "%s · Makiti",
+  },
+  description:
+    "Achetez et vendez facilement en Guinée. Véhicules, immobilier, électronique, mode et plus encore sur Makiti, la marketplace des petites annonces.",
+  keywords: [
+    "petites annonces",
+    "Guinée",
+    "Conakry",
+    "achat",
+    "vente",
+    "occasion",
+    "marketplace",
+    "Makiti",
+  ],
+  authors: [{ name: "Makiti" }],
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: siteUrl,
+    siteName: "Makiti",
+    title: "Makiti — Petites annonces en Guinée",
+    description:
+      "Achetez et vendez facilement en Guinée. La marketplace des petites annonces.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Makiti — Petites annonces en Guinée",
+    description:
+      "Achetez et vendez facilement en Guinée. La marketplace des petites annonces.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
