@@ -1,12 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
 import AfricasTalking from 'africastalking';
 import { PrismaService } from '../prisma/prisma.service';
 
+// Interface minimale pour le service SMS d'Africa's Talking
+interface SmsService {
+  send(options: {
+    to: string[];
+    message: string;
+    from?: string;
+  }): Promise<unknown>;
+}
+
 @Injectable()
 export class OtpService {
-  private sms: any;
+  private readonly sms: SmsService;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -16,12 +24,11 @@ export class OtpService {
       apiKey: this.config.get<string>('AT_API_KEY')!,
       username: this.config.get<string>('AT_USERNAME')!,
     });
-    this.sms = at.SMS;
+    this.sms = at.SMS as SmsService;
   }
 
   async sendOtp(phone: string): Promise<void> {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
 

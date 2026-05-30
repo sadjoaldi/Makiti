@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -6,9 +6,10 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
+  const port = process.env.PORT || 3001;
 
   app.use(helmet());
-
   app.setGlobalPrefix('api/v1');
 
   app.enableCors({
@@ -27,7 +28,7 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger — uniquement en dev
+  // Swagger — uniquement hors production
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Makiti API')
@@ -47,20 +48,14 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
-      },
+      swaggerOptions: { persistAuthorization: true },
     });
 
-    console.log(
-      `📚 Swagger available at http://localhost:${process.env.PORT || 3001}/api/docs`,
-    );
+    logger.log(`📚 Swagger disponible sur http://localhost:${port}/api/docs`);
   }
 
-  await app.listen(process.env.PORT || 3001);
-  console.log(
-    `🚀 Backend running on http://localhost:${process.env.PORT || 3001}/api/v1`,
-  );
+  await app.listen(port);
+  logger.log(`🚀 Backend démarré sur http://localhost:${port}/api/v1`);
 }
 
 void bootstrap();
