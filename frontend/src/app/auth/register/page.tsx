@@ -278,6 +278,21 @@ export default function RegisterPage() {
           >
             {isRegistering ? "Création..." : "Créer mon compte 🎉"}
           </Button>
+
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            En créant un compte, tu acceptes nos{" "}
+            <Link href="/legal/cgu" className="text-primary font-medium">
+              CGU
+            </Link>{" "}
+            et notre{" "}
+            <Link
+              href="/legal/confidentialite"
+              className="text-primary font-medium"
+            >
+              Politique de confidentialité
+            </Link>
+            .
+          </p>
         </form>
       )}
 
