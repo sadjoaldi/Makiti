@@ -1,32 +1,44 @@
+# ─── Builder ──────────────────────────────────────────────
 FROM node:20-alpine AS builder
-
 RUN npm install -g pnpm
-
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# Manifests monorepo
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY frontend/package.json ./frontend/
 
-COPY . .
+RUN pnpm install --frozen-lockfile --filter frontend
 
+# Code frontend
+COPY frontend ./frontend
+
+# Variables de build (NEXT_PUBLIC_* doivent être présentes au build)
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_SENTRY_DSN
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 
+WORKDIR /app/frontend
 RUN pnpm build
 
-# ─── Production image ─────────────────────────────────────
+# ─── Runner ───────────────────────────────────────────────
 FROM node:20-alpine AS runner
-
-RUN npm install -g pnpm
-
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Utilisateur non-root
+RUN addgroup -g 1001 nodejs && adduser -u 1001 -G nodejs -S nextjs
 
+# Standalone output (inclut le minimum nécessaire)
+COPY --from=builder /app/frontend/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./.next/static
+
+USER nextjs
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Le standalone génère server.js à la racine du frontend dans le monorepo
+CMD ["node", "frontend/server.js"]

@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Builds
+**/dist
+**/.next
+**/build
+
+# Env & secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Git
+.git
+.gitignore
+
+# Logs
+**/*.log
+npm-debug.log*
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+
+# Docker
+**/Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Tests & docs
+**/*.spec.ts
+**/*.e2e-spec.ts
+**/coverage
+README.md
+**/README.md
